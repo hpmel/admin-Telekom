@@ -27,9 +27,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getClientById, getContactsByClient, getServicesByClient } from "@/lib/supabase/queries";
-import { getFacturesByClient } from "@/lib/supabase/queries";
+import {
+  getClientById,
+  getContactsByClient,
+  getEmployesByClient,
+  getServicesByClient,
+  getFacturesByClient,
+} from "@/lib/supabase/queries";
 import { formatCAD } from "@/lib/facturation";
+import { ContactsSection } from "./contacts-section";
+import { EmployesSection } from "./employes-section";
 
 const statusConfig: Record<string, { label: string; class: string; emoji: string }> = {
   analyse: { label: "Analyse", class: "bg-blue-500/15 text-blue-700 border-blue-200", emoji: "🔍" },
@@ -60,9 +67,10 @@ interface PageProps {
 
 export default async function ClientDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [client, contacts, services, factures] = await Promise.all([
+  const [client, contacts, employes, services, factures] = await Promise.all([
     getClientById(id),
     getContactsByClient(id),
+    getEmployesByClient(id),
     getServicesByClient(id),
     getFacturesByClient(id),
   ]);
@@ -119,25 +127,30 @@ export default async function ClientDetailPage({ params }: PageProps) {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <MiniKPI
+          icon={<Users className="w-4 h-4" />}
+          label="Contacts"
+          value={contacts.length.toString()}
+        />
+        <MiniKPI
+          icon={<Users className="w-4 h-4" />}
+          label="Employés"
+          value={employes.length.toString()}
+        />
         <MiniKPI
           icon={<Wifi className="w-4 h-4" />}
-          label="Services actifs"
+          label="Services"
           value={services.length.toString()}
         />
         <MiniKPI
           icon={<DollarSign className="w-4 h-4" />}
-          label="Coût mensuel"
+          label="Coût/mois"
           value={formatCAD(totalMensuel)}
         />
         <MiniKPI
           icon={<Receipt className="w-4 h-4" />}
-          label="Factures"
-          value={factures.length.toString()}
-        />
-        <MiniKPI
-          icon={<FileText className="w-4 h-4" />}
-          label="Total facturé"
+          label="Facturé"
           value={formatCAD(totalFacture)}
         />
       </div>
@@ -189,53 +202,15 @@ export default async function ClientDetailPage({ params }: PageProps) {
           </CardContent>
         </Card>
 
-        {/* Right: Contacts + Services + Factures */}
+        {/* Right: Contacts, Employés, Services, Factures */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Contacts */}
-          <Card>
-            <CardHeader className="pb-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary" />
-                Contacts ({contacts.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {contacts.length > 0 ? (
-                <div className="space-y-3">
-                  {contacts.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/20">
-                      <div>
-                        <p className="font-medium text-sm">{c.prenom} {c.nom}</p>
-                        <p className="text-xs text-muted-foreground">{c.fonction}</p>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        {c.courriel && (
-                          <a href={`mailto:${c.courriel}`} className="hover:text-primary transition-colors flex items-center gap-1">
-                            <Mail className="w-3 h-3" /> {c.courriel}
-                          </a>
-                        )}
-                        {c.telephone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" /> {c.telephone}
-                          </span>
-                        )}
-                        <div className="flex gap-1">
-                          {c.est_principal && <Badge variant="secondary" className="text-[10px]">Principal</Badge>}
-                          {c.est_mandataire && <Badge variant="secondary" className="text-[10px]">Mandataire</Badge>}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  Aucun contact enregistré.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          {/* 1. Contacts principaux */}
+          <ContactsSection clientId={id} contacts={contacts} />
 
-          {/* Services */}
+          {/* 2. Employés */}
+          <EmployesSection clientId={id} employes={employes} />
+
+          {/* 3. Services télécom */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -281,7 +256,7 @@ export default async function ClientDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
-          {/* Factures */}
+          {/* 4. Factures */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">

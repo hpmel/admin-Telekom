@@ -7,6 +7,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type {
   Client,
   Contact,
+  Employe,
   ServiceActuel,
   Facture,
   DashboardKPIs,
@@ -56,6 +57,23 @@ export async function getContactsByClient(clientId: string): Promise<Contact[]> 
 
   if (error) {
     console.error('getContactsByClient error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+// ---- EMPLOYÉS ----
+
+export async function getEmployesByClient(clientId: string): Promise<Employe[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('employes')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('nom');
+
+  if (error) {
+    console.error('getEmployesByClient error:', error.message);
     return [];
   }
   return data ?? [];
