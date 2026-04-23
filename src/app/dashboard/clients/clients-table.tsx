@@ -74,9 +74,11 @@ export function ClientsTable({ initialClients }: { initialClients: Client[] }) {
             {initialClients.length} entreprises dans votre portefeuille
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Nouveau client
+        <Button className="gap-2" asChild>
+          <Link href="/dashboard/clients/nouveau">
+            <Plus className="w-4 h-4" />
+            Nouveau client
+          </Link>
         </Button>
       </div>
 

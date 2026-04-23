@@ -1,25 +1,45 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, Shield, TrendingDown } from "lucide-react";
+import { Phone, Shield, TrendingDown, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Replace with Supabase auth
-    // For now, redirect directly to dashboard
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 800);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError(
+        authError.message === "Invalid login credentials"
+          ? "Courriel ou mot de passe incorrect."
+          : authError.message
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    // Login successful — redirect to dashboard
+    router.push("/dashboard");
+    router.refresh();
   };
 
   return (
@@ -79,15 +99,22 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-5">
+                {error && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {error}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email">Courriel</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="marie@econotelekom.com"
+                    placeholder="econotelekom@gmail.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-11"
+                    required
                     autoFocus
                   />
                 </div>
@@ -100,6 +127,8 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-11"
+                    required
+                    minLength={6}
                   />
                 </div>
                 <Button

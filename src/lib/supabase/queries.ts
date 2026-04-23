@@ -107,6 +107,21 @@ export async function getFactures(): Promise<Facture[]> {
   return data ?? [];
 }
 
+export async function getFacturesByClient(clientId: string): Promise<Facture[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('factures')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('getFacturesByClient error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
 // ---- DASHBOARD KPIs ----
 
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
