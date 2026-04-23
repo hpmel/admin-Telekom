@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🟢 Écono Télékom CRM
 
-## Getting Started
+> CRM/TEM sur mesure pour Écono Télékom — Tour de contrôle pour la gestion des clients B2B en télécommunications.
 
-First, run the development server:
+## Stack technique
+
+| Couche | Technologie |
+|--------|-------------|
+| Frontend | Next.js 16 (App Router) + React 19 + TypeScript |
+| UI | Tailwind CSS v4 + shadcn/ui |
+| Base de données | PostgreSQL via Supabase |
+| Auth | Supabase Auth |
+| Hébergement | Vercel |
+
+## Démarrage rapide
 
 ```bash
+# Cloner le repo
+git clone https://github.com/hpmel/econotelekom-crm.git
+cd econotelekom-crm
+
+# Installer les dépendances
+npm install
+
+# Configurer l'environnement
+cp .env.example .env.local
+# Remplir les valeurs Supabase dans .env.local
+
+# Créer les tables dans Supabase
+# → Copier le contenu de supabase/migrations/001_initial_schema.sql
+# → Coller dans Supabase SQL Editor et exécuter
+
+# Lancer le serveur de développement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Modules
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **📊 Dashboard** — KPIs, pipeline, alertes, activité récente
+- **👥 Clients** — CRUD complet, recherche, filtres par statut
+- **📋 Pipeline** — Vue Kanban (Analyse → Négociation → Courtage → Client)
+- **📡 Inventaire Télécom** — Services par client/fournisseur
+- **💰 Facturation** — Calcul auto 27% + 77$/h, taxes QC (TPS/TVQ)
+- **📄 Documents** — *(Phase 2)* Génération PDF, e-signatures
+- **📧 Communications** — *(Phase 2)* Templates courriel automatisés
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Modèle d'affaires
 
-## Learn More
+- **27%** des économies générées (calculé sur 24 mois si sans contrat)
+- **77 $/h** pour le travail administratif
+- Taxes Québec : TPS 5% + TVQ 9.975%
 
-To learn more about Next.js, take a look at the following resources:
+## Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── dashboard/       # Toutes les pages CRM
+│   ├── login/           # Page de connexion
+│   └── layout.tsx       # Root layout
+├── components/ui/       # shadcn/ui
+├── lib/
+│   ├── supabase/        # Client, server, queries
+│   ├── facturation.ts   # Moteur de calcul
+│   └── mock-data.ts     # Données de dev
+└── types/               # TypeScript definitions
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Licence
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Propriétaire — KMD Web © 2025
