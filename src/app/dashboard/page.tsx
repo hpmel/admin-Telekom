@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Users,
   DollarSign,
@@ -11,13 +9,11 @@ import {
   FileText,
   ArrowUpRight,
   ArrowDownRight,
-  CircleDot,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { mockKPIs, mockPipelineCounts, mockActivity, mockFactures } from "@/lib/mock-data";
+import { getDashboardKPIs, getPipelineCounts, getFactures } from "@/lib/supabase/queries";
 import { formatCAD } from "@/lib/facturation";
 import Link from "next/link";
 
@@ -35,14 +31,6 @@ const pipelineLabels: Record<string, string> = {
   client: "Client",
 };
 
-const activityIcons: Record<string, React.ReactNode> = {
-  client_added: <UserPlus className="w-4 h-4 text-primary" />,
-  status_changed: <CircleDot className="w-4 h-4 text-amber-500" />,
-  invoice_sent: <Receipt className="w-4 h-4 text-blue-500" />,
-  document_signed: <FileText className="w-4 h-4 text-purple-500" />,
-  payment_received: <DollarSign className="w-4 h-4 text-emerald-500" />,
-};
-
 const statutBadgeVariant: Record<string, string> = {
   payee: "bg-emerald-500/15 text-emerald-700 border-emerald-200",
   envoyee: "bg-blue-500/15 text-blue-700 border-blue-200",
@@ -50,10 +38,15 @@ const statutBadgeVariant: Record<string, string> = {
   brouillon: "bg-gray-500/15 text-gray-700 border-gray-200",
 };
 
-export default function DashboardPage() {
-  const kpis = mockKPIs;
-  const pipeline = mockPipelineCounts;
+export default async function DashboardPage() {
+  const [kpis, pipeline, factures] = await Promise.all([
+    getDashboardKPIs(),
+    getPipelineCounts(),
+    getFactures(),
+  ]);
+
   const total = pipeline.analyse + pipeline.negociation + pipeline.courtage + pipeline.client;
+  const facturesEnRetard = factures.filter((f) => f.statut === "en_retard").length;
 
   return (
     <div className="space-y-8">
@@ -64,7 +57,7 @@ export default function DashboardPage() {
             Tableau de bord
           </h1>
           <p className="text-muted-foreground mt-1">
-            Bienvenue Marie-Josée — voici votre vue d&apos;ensemble.
+            Bienvenue — voici votre vue d&apos;ensemble.
           </p>
         </div>
         <div className="flex gap-3">
@@ -134,7 +127,7 @@ export default function DashboardPage() {
                 <div
                   key={key}
                   className={`${pipelineColors[key]} transition-all duration-700 ease-out`}
-                  style={{ width: `${(count / total) * 100}%` }}
+                  style={{ width: total > 0 ? `${(count / total) * 100}%` : "0%" }}
                 />
               ))}
             </div>
@@ -184,10 +177,10 @@ export default function DashboardPage() {
                 variant="info"
               />
             )}
-            {mockFactures.filter((f) => f.statut === "en_retard").length > 0 && (
+            {facturesEnRetard > 0 && (
               <AlertItem
                 icon={<AlertTriangle className="w-4 h-4 text-red-500" />}
-                label={`${mockFactures.filter((f) => f.statut === "en_retard").length} facture(s) en retard`}
+                label={`${facturesEnRetard} facture(s) en retard`}
                 href="/dashboard/facturation"
                 variant="danger"
               />
@@ -202,7 +195,8 @@ export default function DashboardPage() {
             )}
             {kpis.factures_en_attente === 0 &&
               kpis.contrats_a_renouveler === 0 &&
-              kpis.soumissions_expirantes === 0 && (
+              kpis.soumissions_expirantes === 0 &&
+              facturesEnRetard === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   ✅ Aucune alerte en ce moment
                 </p>
@@ -211,74 +205,51 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Recent Activity + Recent Invoices */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Activity feed */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
-          <CardHeader>
-            <CardTitle className="text-lg">Activité récente</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockActivity.map((item) => (
-                <div key={item.id} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center mt-0.5">
-                    {activityIcons[item.type]}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{item.description}</p>
-                    <p className="text-xs text-muted-foreground">{item.client_name}</p>
-                  </div>
-                  <time className="text-xs text-muted-foreground whitespace-nowrap">
-                    {formatRelativeDate(item.timestamp)}
-                  </time>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent invoices */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Dernières factures</CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dashboard/facturation">
-                Voir tout <ArrowUpRight className="w-3 h-3 ml-1" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {mockFactures.map((f) => (
-                <div
-                  key={f.id}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Receipt className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">{f.numero}</p>
-                      <p className="text-xs text-muted-foreground">{f.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold">{formatCAD(f.montant_ttc)}</span>
-                    <Badge
-                      variant="outline"
-                      className={statutBadgeVariant[f.statut]}
-                    >
-                      {f.statut === "payee" ? "Payée" :
-                       f.statut === "envoyee" ? "Envoyée" :
-                       f.statut === "en_retard" ? "En retard" : "Brouillon"}
-                    </Badge>
+      {/* Recent Invoices */}
+      <Card className="animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg">Dernières factures</CardTitle>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/dashboard/facturation">
+              Voir tout <ArrowUpRight className="w-3 h-3 ml-1" />
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {factures.slice(0, 5).map((f) => (
+              <div
+                key={f.id}
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Receipt className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">{f.numero}</p>
+                    <p className="text-xs text-muted-foreground">{f.description}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold">{formatCAD(f.montant_ttc)}</span>
+                  <Badge
+                    variant="outline"
+                    className={statutBadgeVariant[f.statut]}
+                  >
+                    {f.statut === "payee" ? "Payée" :
+                     f.statut === "envoyee" ? "Envoyée" :
+                     f.statut === "en_retard" ? "En retard" : "Brouillon"}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+            {factures.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Aucune facture pour le moment.
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -357,17 +328,4 @@ function AlertItem({
       <ArrowUpRight className="w-3 h-3 ml-auto text-muted-foreground" />
     </Link>
   );
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Aujourd'hui";
-  if (diffDays === 1) return "Hier";
-  if (diffDays < 7) return `Il y a ${diffDays}j`;
-  if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} sem.`;
-  return date.toLocaleDateString("fr-CA", { day: "numeric", month: "short" });
 }

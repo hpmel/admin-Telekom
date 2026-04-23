@@ -1,11 +1,9 @@
-"use client";
-
 import { Wifi, Plus } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockServicesActuels, mockClients } from "@/lib/mock-data";
+import { getAllServices, getClients } from "@/lib/supabase/queries";
 import { formatCAD } from "@/lib/facturation";
 
 const typeLabels: Record<string, string> = {
@@ -17,7 +15,9 @@ const typeLabels: Record<string, string> = {
   paiement: "💳 Paiement",
 };
 
-export default function InventairePage() {
+export default async function InventairePage() {
+  const [services, clients] = await Promise.all([getAllServices(), getClients()]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -27,7 +27,7 @@ export default function InventairePage() {
             Inventaire Télécom
           </h1>
           <p className="text-muted-foreground mt-1">
-            Services actifs de vos clients par catégorie
+            {services.length} services actifs de vos clients
           </p>
         </div>
         <Button className="gap-2">
@@ -51,8 +51,8 @@ export default function InventairePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockServicesActuels.map((s) => {
-                const client = mockClients.find((c) => c.id === s.client_id);
+              {services.map((s) => {
+                const client = clients.find((c) => c.id === s.client_id);
                 return (
                   <TableRow key={s.id} className="hover:bg-muted/30">
                     <TableCell className="font-medium">
@@ -75,6 +75,13 @@ export default function InventairePage() {
                   </TableRow>
                 );
               })}
+              {services.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                    Aucun service enregistré.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

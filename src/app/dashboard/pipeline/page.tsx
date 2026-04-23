@@ -1,11 +1,9 @@
-"use client";
-
-import { mockClients } from "@/lib/mock-data";
+import { getClients } from "@/lib/supabase/queries";
 import type { PipelineStatus, Client } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, MapPin, Users as UsersIcon } from "lucide-react";
+import { MapPin, Users as UsersIcon } from "lucide-react";
 import Link from "next/link";
 
 const columns: { key: PipelineStatus; label: string; color: string; bgColor: string }[] = [
@@ -15,9 +13,11 @@ const columns: { key: PipelineStatus; label: string; color: string; bgColor: str
   { key: "client", label: "✅ Client", color: "bg-emerald-500", bgColor: "bg-emerald-50" },
 ];
 
-export default function PipelinePage() {
+export default async function PipelinePage() {
+  const allClients = await getClients();
+
   const clientsByStatus = (status: PipelineStatus): Client[] =>
-    mockClients.filter((c) => c.statut === status);
+    allClients.filter((c) => c.statut === status);
 
   return (
     <div className="space-y-6">

@@ -1,9 +1,9 @@
 // ========================================
-// Écono Télékom CRM — Supabase Data Access Layer
-// Replaces mock-data with real Supabase queries
+// Écono Télékom CRM — Server-Side Supabase Queries
+// For use in Server Components (SSR / RSC)
 // ========================================
 
-import { createClient } from '@/lib/supabase/client';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type {
   Client,
   Contact,
@@ -11,157 +11,152 @@ import type {
   Facture,
   DashboardKPIs,
   PipelineCounts,
-  PipelineStatus,
 } from '@/types';
-
-const supabase = createClient();
 
 // ---- CLIENTS ----
 
 export async function getClients(): Promise<Client[]> {
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('clients')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('getClients error:', error.message);
+    return [];
+  }
   return data ?? [];
 }
 
 export async function getClientById(id: string): Promise<Client | null> {
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('clients')
     .select('*')
     .eq('id', id)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('getClientById error:', error.message);
+    return null;
+  }
   return data;
-}
-
-export async function createClientRecord(client: Omit<Client, 'id' | 'created_at' | 'updated_at'>): Promise<Client> {
-  const { data, error } = await supabase
-    .from('clients')
-    .insert(client)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function updateClientRecord(id: string, updates: Partial<Client>): Promise<Client> {
-  const { data, error } = await supabase
-    .from('clients')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function deleteClientRecord(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('clients')
-    .delete()
-    .eq('id', id);
-
-  if (error) throw error;
 }
 
 // ---- CONTACTS ----
 
 export async function getContactsByClient(clientId: string): Promise<Contact[]> {
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('contacts')
     .select('*')
     .eq('client_id', clientId)
     .order('est_principal', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('getContactsByClient error:', error.message);
+    return [];
+  }
   return data ?? [];
 }
 
 // ---- SERVICES ACTUELS ----
 
-export async function getServicesByClient(clientId: string): Promise<ServiceActuel[]> {
-  const { data, error } = await supabase
-    .from('services_actuels')
-    .select('*')
-    .eq('client_id', clientId);
-
-  if (error) throw error;
-  return data ?? [];
-}
-
 export async function getAllServices(): Promise<ServiceActuel[]> {
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('services_actuels')
     .select('*')
     .order('client_id');
 
-  if (error) throw error;
+  if (error) {
+    console.error('getAllServices error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function getServicesByClient(clientId: string): Promise<ServiceActuel[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('services_actuels')
+    .select('*')
+    .eq('client_id', clientId);
+
+  if (error) {
+    console.error('getServicesByClient error:', error.message);
+    return [];
+  }
   return data ?? [];
 }
 
 // ---- FACTURES ----
 
 export async function getFactures(): Promise<Facture[]> {
+  const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('factures')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
-  return data ?? [];
-}
-
-export async function getFacturesByClient(clientId: string): Promise<Facture[]> {
-  const { data, error } = await supabase
-    .from('factures')
-    .select('*')
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
+  if (error) {
+    console.error('getFactures error:', error.message);
+    return [];
+  }
   return data ?? [];
 }
 
 // ---- DASHBOARD KPIs ----
 
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
-  const { data: clients } = await supabase.from('clients').select('statut');
-  const { data: factures } = await supabase.from('factures').select('montant_ttc, statut');
+  const supabase = await createServerSupabaseClient();
 
-  const allClients = clients ?? [];
-  const allFactures = factures ?? [];
+  const [clientsRes, facturesRes, servicesRes] = await Promise.all([
+    supabase.from('clients').select('statut'),
+    supabase.from('factures').select('montant_ttc, statut'),
+    supabase.from('services_actuels').select('date_fin_engagement'),
+  ]);
+
+  const allClients = clientsRes.data ?? [];
+  const allFactures = facturesRes.data ?? [];
+  const allServices = servicesRes.data ?? [];
 
   const clientsActifs = allClients.filter((c) => c.statut === 'client').length;
   const facturesPayees = allFactures.filter((f) => f.statut === 'payee');
-  const facturesEnAttente = allFactures.filter((f) => f.statut === 'envoyee' || f.statut === 'en_retard');
+  const facturesEnAttente = allFactures.filter(
+    (f) => f.statut === 'envoyee' || f.statut === 'en_retard'
+  );
 
   const revenus_total = facturesPayees.reduce((sum, f) => sum + Number(f.montant_ttc), 0);
+
+  // Contrats qui finissent dans les 60 prochains jours
+  const now = new Date();
+  const in60Days = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const contratsARenouveler = allServices.filter((s) => {
+    if (!s.date_fin_engagement) return false;
+    const fin = new Date(s.date_fin_engagement);
+    return fin >= now && fin <= in60Days;
+  }).length;
 
   return {
     total_clients: allClients.length,
     clients_actifs: clientsActifs,
-    economies_generees: revenus_total * 3.7, // approximate based on 27% commission
-    revenus_mois: facturesPayees.length > 0
-      ? revenus_total / Math.max(facturesPayees.length, 1)
-      : 0,
+    economies_generees: revenus_total * 3.7, // approximation based on 27% commission
+    revenus_mois: revenus_total,
     revenus_total,
-    taux_conversion: allClients.length > 0
-      ? Math.round((clientsActifs / allClients.length) * 100)
-      : 0,
+    taux_conversion:
+      allClients.length > 0
+        ? Math.round((clientsActifs / allClients.length) * 100)
+        : 0,
     factures_en_attente: facturesEnAttente.length,
-    contrats_a_renouveler: 0, // TODO: query services_actuels where date_fin_engagement is near
-    soumissions_expirantes: 0, // TODO: query documents where date_expiration is near
+    contrats_a_renouveler: contratsARenouveler,
+    soumissions_expirantes: 0, // TODO: query documents
   };
 }
 
 export async function getPipelineCounts(): Promise<PipelineCounts> {
+  const supabase = await createServerSupabaseClient();
   const { data } = await supabase.from('clients').select('statut');
   const clients = data ?? [];
 
