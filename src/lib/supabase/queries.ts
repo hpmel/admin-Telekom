@@ -12,6 +12,9 @@ import type {
   Facture,
   DashboardKPIs,
   PipelineCounts,
+  OptionTypeService,
+  OptionFournisseur,
+  OptionForfait,
 } from '@/types';
 
 // ---- CLIENTS ----
@@ -200,3 +203,45 @@ export async function getPipelineCounts(): Promise<PipelineCounts> {
     client: clients.filter((c) => c.statut === 'client').length,
   };
 }
+
+// ---- OPTIONS DYNAMIQUES (Paramètres) ----
+
+export async function getTypesServices(): Promise<OptionTypeService[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('options_types_services')
+    .select('*')
+    .order('ordre');
+  if (error) {
+    console.error('getTypesServices error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function getFournisseurs(): Promise<OptionFournisseur[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('options_fournisseurs')
+    .select('*')
+    .order('ordre');
+  if (error) {
+    console.error('getFournisseurs error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function getForfaits(): Promise<OptionForfait[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('options_forfaits')
+    .select('*')
+    .order('ordre');
+  if (error) {
+    console.error('getForfaits error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+

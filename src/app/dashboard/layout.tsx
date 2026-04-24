@@ -78,27 +78,29 @@ export default function DashboardLayout({
 
             return (
               <Tooltip key={item.href} delayDuration={collapsed ? 0 : 9999}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-primary shadow-sm"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                    )}
-                  >
-                    <item.icon
+                <TooltipTrigger 
+                  render={
+                    <Link
+                      href={item.href}
                       className={cn(
-                        "w-5 h-5 flex-shrink-0",
-                        isActive ? "text-sidebar-primary" : ""
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-primary shadow-sm"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                       )}
                     />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                    {isActive && !collapsed && (
-                      <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sidebar-primary animate-pulse-green" />
+                  }
+                >
+                  <item.icon
+                    className={cn(
+                      "w-5 h-5 flex-shrink-0",
+                      isActive ? "text-sidebar-primary" : ""
                     )}
-                  </Link>
+                  />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  {isActive && !collapsed && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sidebar-primary animate-pulse-green" />
+                  )}
                 </TooltipTrigger>
                 {collapsed && (
                   <TooltipContent side="right" className="font-medium">
@@ -115,14 +117,16 @@ export default function DashboardLayout({
           <Separator className="mb-2" />
           {bottomItems.map((item) => (
             <Tooltip key={item.href} delayDuration={collapsed ? 0 : 9999}>
-              <TooltipTrigger asChild>
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
-                >
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
-                </Link>
+              <TooltipTrigger 
+                render={
+                  <Link
+                    href={item.href}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+                  />
+                }
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
               </TooltipTrigger>
               {collapsed && (
                 <TooltipContent side="right">{item.label}</TooltipContent>

@@ -5,27 +5,11 @@
 // Pipeline statuses
 export type PipelineStatus = 'analyse' | 'negociation' | 'courtage' | 'client';
 
-// Service types
-export type TypeService =
-  | 'internet'
-  | 'telephonie_ip'
-  | 'telephonie_conv'
-  | 'mobilite'
-  | 'tv'
-  | 'paiement';
+// Service types (dynamic — managed from Paramètres)
+export type TypeService = string;
 
-// Telecom providers
-export type Fournisseur =
-  | 'Bell'
-  | 'Vidéotron'
-  | 'Rogers'
-  | 'Telus'
-  | 'Fizz'
-  | 'Koodo'
-  | 'Fido'
-  | 'Virgin Plus'
-  | 'Freedom'
-  | 'Autre';
+// Telecom providers (dynamic — managed from Paramètres)
+export type Fournisseur = string;
 
 // Invoice statuses
 export type StatutFacture = 'brouillon' | 'envoyee' | 'payee' | 'en_retard';
@@ -98,6 +82,9 @@ export interface ServiceActuel {
   date_facturation: string | null;
   date_fin_engagement: string | null;
   prix_mensuel: number;
+  futur_fournisseur: string | null;
+  date_activation: string | null;
+  economie: number | null;
 }
 
 export interface ServiceTelekom {
@@ -175,3 +162,28 @@ export interface PipelineCounts {
 
 export type ClientFormData = Omit<Client, 'id' | 'created_at' | 'updated_at'>;
 export type ContactFormData = Omit<Contact, 'id'>;
+
+// ---- Dynamic Options (managed in Paramètres) ----
+
+export interface OptionTypeService {
+  id: string;
+  label: string;
+  emoji: string;
+  actif: boolean;
+  ordre: number;
+}
+
+export interface OptionFournisseur {
+  id: string;
+  nom: string;
+  actif: boolean;
+  ordre: number;
+}
+
+export interface OptionForfait {
+  id: string;
+  nom: string;
+  fournisseur_id: string | null;
+  actif: boolean;
+  ordre: number;
+}

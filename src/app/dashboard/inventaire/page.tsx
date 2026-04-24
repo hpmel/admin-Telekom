@@ -1,91 +1,43 @@
-import { Wifi, Plus } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getAllServices, getClients } from "@/lib/supabase/queries";
-import { formatCAD } from "@/lib/facturation";
-
-const typeLabels: Record<string, string> = {
-  internet: "🌐 Internet",
-  telephonie_ip: "📞 Téléphonie IP",
-  telephonie_conv: "☎️ Téléphonie conv.",
-  mobilite: "📱 Mobilité",
-  tv: "📺 Télévision",
-  paiement: "💳 Paiement",
-};
+import { Wifi } from "lucide-react";
+import { getAllServices, getClients, getTypesServices, getFournisseurs, getForfaits } from "@/lib/supabase/queries";
+import { InventaireTable } from "./inventaire-table";
+import { MotionFadeIn } from "@/components/motion-wrapper";
 
 export default async function InventairePage() {
-  const [services, clients] = await Promise.all([getAllServices(), getClients()]);
+  const [services, clients, typesServices, fournisseurs, forfaits] = await Promise.all([
+    getAllServices(),
+    getClients(),
+    getTypesServices(),
+    getFournisseurs(),
+    getForfaits(),
+  ]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Wifi className="w-8 h-8 text-primary" />
-            Inventaire Télécom
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {services.length} services actifs de vos clients
-          </p>
+    <div className="space-y-8 pb-10">
+      {/* Header */}
+      <MotionFadeIn delay={0.1}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-gradient flex items-center gap-3">
+              <Wifi className="w-8 h-8 text-primary" />
+              Inventaire Télécom
+            </h1>
+            <p className="text-muted-foreground mt-1 text-lg">
+              {services.length} services gérés au total
+            </p>
+          </div>
         </div>
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Ajouter un service
-        </Button>
-      </div>
+      </MotionFadeIn>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/30">
-                <TableHead className="font-semibold">Client</TableHead>
-                <TableHead className="font-semibold">Type</TableHead>
-                <TableHead className="font-semibold">Fournisseur</TableHead>
-                <TableHead className="font-semibold">Forfait</TableHead>
-                <TableHead className="font-semibold text-right">Lignes</TableHead>
-                <TableHead className="font-semibold text-right">Prix/mois</TableHead>
-                <TableHead className="font-semibold">Fin engagement</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {services.map((s) => {
-                const client = clients.find((c) => c.id === s.client_id);
-                return (
-                  <TableRow key={s.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">
-                      {client?.raison_sociale ?? "—"}
-                    </TableCell>
-                    <TableCell>{typeLabels[s.type_service] ?? s.type_service}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{s.fournisseur}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{s.forfait ?? "—"}</TableCell>
-                    <TableCell className="text-right">{s.nb_lignes}</TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatCAD(s.prix_mensuel)}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {s.date_fin_engagement
-                        ? new Date(s.date_fin_engagement).toLocaleDateString("fr-CA")
-                        : <span className="text-muted-foreground">Sans contrat</span>}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {services.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
-                    Aucun service enregistré.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <MotionFadeIn delay={0.2}>
+        <InventaireTable
+          initialServices={services}
+          clients={clients}
+          optionsTypes={typesServices}
+          optionsFournisseurs={fournisseurs}
+          optionsForfaits={forfaits}
+        />
+      </MotionFadeIn>
     </div>
   );
 }
