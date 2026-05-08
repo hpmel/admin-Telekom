@@ -143,6 +143,37 @@ export async function getFacturesByClient(clientId: string): Promise<Facture[]> 
   return data ?? [];
 }
 
+// ---- DOCUMENTS ----
+
+export async function getDocuments(): Promise<(Document & { clients: { raison_sociale: string } })[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*, clients(raison_sociale)')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('getDocuments error:', error.message);
+    return [];
+  }
+  return (data as any) ?? [];
+}
+
+export async function getDocumentsByClient(clientId: string): Promise<Document[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('getDocumentsByClient error:', error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
 // ---- DASHBOARD KPIs ----
 
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
