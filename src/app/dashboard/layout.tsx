@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 
@@ -77,7 +77,8 @@ export default function DashboardLayout({
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
             return (
-              <Tooltip key={item.href} delayDuration={collapsed ? 0 : 9999}>
+              <TooltipProvider key={item.href} delay={collapsed ? 0 : 9999}>
+                <Tooltip>
                 <TooltipTrigger 
                   render={
                     <Link
@@ -107,7 +108,8 @@ export default function DashboardLayout({
                     {item.label}
                   </TooltipContent>
                 )}
-              </Tooltip>
+                </Tooltip>
+              </TooltipProvider>
             );
           })}
         </nav>
@@ -116,7 +118,8 @@ export default function DashboardLayout({
         <div className="px-2 pb-2 space-y-1">
           <Separator className="mb-2" />
           {bottomItems.map((item) => (
-            <Tooltip key={item.href} delayDuration={collapsed ? 0 : 9999}>
+            <TooltipProvider key={item.href} delay={collapsed ? 0 : 9999}>
+              <Tooltip>
               <TooltipTrigger 
                 render={
                   <Link
@@ -131,7 +134,8 @@ export default function DashboardLayout({
               {collapsed && (
                 <TooltipContent side="right">{item.label}</TooltipContent>
               )}
-            </Tooltip>
+              </Tooltip>
+            </TooltipProvider>
           ))}
 
           <Link

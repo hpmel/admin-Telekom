@@ -55,9 +55,9 @@ export const mockContacts: Contact[] = [
 ];
 
 export const mockServicesActuels: ServiceActuel[] = [
-  { id: 's1', client_id: '1', type_service: 'mobilite', fournisseur: 'Bell', forfait: 'Affaires 25 Go', nb_lignes: 12, no_contrat: 'BEL-2023-44521', date_facturation: '2025-05-01', date_fin_engagement: '2025-12-15', prix_mensuel: 840 },
-  { id: 's2', client_id: '1', type_service: 'internet', fournisseur: 'Vidéotron', forfait: 'Affaires 500 Mbps', nb_lignes: 1, no_contrat: 'VID-2024-87612', date_facturation: '2025-05-15', date_fin_engagement: '2026-03-01', prix_mensuel: 125 },
-  { id: 's3', client_id: '2', type_service: 'internet', fournisseur: 'Bell', forfait: 'Fibe 100', nb_lignes: 1, no_contrat: null, date_facturation: '2025-05-05', date_fin_engagement: null, prix_mensuel: 89.95 },
+  { id: 's1', client_id: '1', type_service: 'mobilite', fournisseur: 'Bell', forfait: 'Affaires 25 Go', nb_lignes: 12, no_contrat: 'BEL-2023-44521', date_facturation: '2025-05-01', date_fin_engagement: '2025-12-15', prix_mensuel: 840, futur_fournisseur: null, date_activation: null, economie: null },
+  { id: 's2', client_id: '1', type_service: 'internet', fournisseur: 'Vidéotron', forfait: 'Affaires 500 Mbps', nb_lignes: 1, no_contrat: 'VID-2024-87612', date_facturation: '2025-05-15', date_fin_engagement: '2026-03-01', prix_mensuel: 125, futur_fournisseur: null, date_activation: null, economie: null },
+  { id: 's3', client_id: '2', type_service: 'internet', fournisseur: 'Bell', forfait: 'Fibe 100', nb_lignes: 1, no_contrat: null, date_facturation: '2025-05-05', date_fin_engagement: null, prix_mensuel: 89.95, futur_fournisseur: null, date_activation: null, economie: null },
 ];
 
 export const mockFactures: Facture[] = [

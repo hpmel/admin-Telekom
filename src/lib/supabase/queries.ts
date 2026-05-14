@@ -15,6 +15,7 @@ import type {
   OptionTypeService,
   OptionFournisseur,
   OptionForfait,
+  Document as AppDocument,
 } from '@/types';
 
 // ---- CLIENTS ----
@@ -145,7 +146,7 @@ export async function getFacturesByClient(clientId: string): Promise<Facture[]> 
 
 // ---- DOCUMENTS ----
 
-export async function getDocuments(): Promise<(Document & { clients: { raison_sociale: string } })[]> {
+export async function getDocuments(): Promise<(AppDocument & { clients: { raison_sociale: string } })[]> {
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('documents')
@@ -159,7 +160,7 @@ export async function getDocuments(): Promise<(Document & { clients: { raison_so
   return (data as any) ?? [];
 }
 
-export async function getDocumentsByClient(clientId: string): Promise<Document[]> {
+export async function getDocumentsByClient(clientId: string): Promise<AppDocument[]> {
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase
     .from('documents')

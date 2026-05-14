@@ -502,7 +502,7 @@ export function ForfaitsCard({ initialData, fournisseurs }: { initialData: Optio
             </div>
             <div className="space-y-2">
               <Label>Fournisseur associé <span className="text-muted-foreground">(optionnel)</span></Label>
-              <Select value={fournisseurId} onValueChange={setFournisseurId}>
+              <Select value={fournisseurId} onValueChange={(val) => setFournisseurId(val || "")}>
                 <SelectTrigger className="bg-background/50">
                   <SelectValue placeholder="Aucun (tous les fournisseurs)" />
                 </SelectTrigger>

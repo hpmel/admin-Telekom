@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${outfit.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <TooltipProvider delayDuration={300}>
+        <TooltipProvider delay={300}>
           {children}
         </TooltipProvider>
         <Toaster richColors position="top-right" />

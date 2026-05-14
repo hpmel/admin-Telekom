@@ -95,7 +95,7 @@ export function ClientsTable({ initialClients }: { initialClients: Client[] }) {
                 className="pl-9"
               />
             </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value || "all")}>
               <SelectTrigger className="w-[200px]">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Filtrer par statut" />

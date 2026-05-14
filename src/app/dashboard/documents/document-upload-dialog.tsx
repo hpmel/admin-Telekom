@@ -131,7 +131,7 @@ export function DocumentUploadDialog({ clientId, clients }: DocumentUploadDialog
           {!clientId && clients && (
             <div className="grid gap-2">
               <Label>Client</Label>
-              <Select value={selectedClient} onValueChange={setSelectedClient}>
+              <Select value={selectedClient} onValueChange={(value) => setSelectedClient(value || "")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un client" />
                 </SelectTrigger>
@@ -148,7 +148,7 @@ export function DocumentUploadDialog({ clientId, clients }: DocumentUploadDialog
 
           <div className="grid gap-2">
             <Label>Type de document</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={(value) => setType(value || "autre")}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

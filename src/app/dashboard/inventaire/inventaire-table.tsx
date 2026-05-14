@@ -258,7 +258,7 @@ export function InventaireTable({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Client</Label>
-                  <Select value={formData.client_id} onValueChange={(val) => setFormData({...formData, client_id: val})}>
+                  <Select value={formData.client_id} onValueChange={(val) => setFormData({...formData, client_id: val || ""})}>
                     <SelectTrigger className="bg-background/50">
                       <SelectValue placeholder="Sélectionner un client" />
                     </SelectTrigger>
@@ -272,7 +272,7 @@ export function InventaireTable({
                 
                 <div className="space-y-2">
                   <Label>Type de service</Label>
-                  <Select value={formData.type_service as string} onValueChange={(val) => setFormData({...formData, type_service: val})}>
+                  <Select value={formData.type_service as string} onValueChange={(val) => setFormData({...formData, type_service: val || ""})}>
                     <SelectTrigger className="bg-background/50">
                       <SelectValue />
                     </SelectTrigger>
@@ -286,7 +286,7 @@ export function InventaireTable({
 
                 <div className="space-y-2">
                   <Label>Fournisseur Actuel</Label>
-                  <Select value={formData.fournisseur} onValueChange={(val) => setFormData({...formData, fournisseur: val})}>
+                  <Select value={formData.fournisseur} onValueChange={(val) => setFormData({...formData, fournisseur: val || ""})}>
                     <SelectTrigger className="bg-background/50">
                       <SelectValue placeholder="Choisir un fournisseur..." />
                     </SelectTrigger>
@@ -301,7 +301,7 @@ export function InventaireTable({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Forfait (nom/vitesse)</Label>
-                    <Select value={formData.forfait} onValueChange={(val) => setFormData({...formData, forfait: val})}>
+                    <Select value={formData.forfait} onValueChange={(val) => setFormData({...formData, forfait: val || ""})}>
                       <SelectTrigger className="bg-background/50">
                         <SelectValue placeholder="Choisir..." />
                       </SelectTrigger>
@@ -341,7 +341,7 @@ export function InventaireTable({
                     <Label>Fin engagement</Label>
                     <Input 
                       type="date" 
-                      value={formData.date_fin_engagement} 
+                      value={formData.date_fin_engagement || ""} 
                       onChange={e => setFormData({...formData, date_fin_engagement: e.target.value})} 
                       className="bg-background/50 text-sm"
                     />
@@ -358,7 +358,7 @@ export function InventaireTable({
 
                 <div className="space-y-2">
                   <Label>Futur Fournisseur</Label>
-                  <Select value={formData.futur_fournisseur} onValueChange={(val) => setFormData({...formData, futur_fournisseur: val})}>
+                  <Select value={formData.futur_fournisseur} onValueChange={(val) => setFormData({...formData, futur_fournisseur: val || ""})}>
                     <SelectTrigger className="bg-background/50">
                       <SelectValue placeholder="Choisir un fournisseur..." />
                     </SelectTrigger>
@@ -375,7 +375,7 @@ export function InventaireTable({
                   <Label>Date d'activation (prévue/réelle)</Label>
                   <Input 
                     type="date" 
-                    value={formData.date_activation} 
+                    value={formData.date_activation || ""} 
                     onChange={e => setFormData({...formData, date_activation: e.target.value})} 
                     className="bg-background text-sm"
                   />
@@ -386,7 +386,7 @@ export function InventaireTable({
                   <Input 
                     type="number" 
                     step="0.01"
-                    value={formData.economie} 
+                    value={formData.economie ?? ""} 
                     onChange={e => setFormData({...formData, economie: parseFloat(e.target.value) || 0})} 
                     className="bg-background font-bold text-emerald-600"
                     placeholder="0.00"
